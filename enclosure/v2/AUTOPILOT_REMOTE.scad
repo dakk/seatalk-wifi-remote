@@ -26,10 +26,11 @@ pcb =
 ];
 
 //-- padding between PCB and inside wall
-paddingFront  = 4;
-paddingBack   = 4;
-paddingRight  = 4;
-paddingLeft   = 4;
+//-- increased to avoid overlap between PCB stands and box corner connectors
+paddingFront  = 10;
+paddingBack   = 10;
+paddingRight  = 10;
+paddingLeft   = 10;
 
 //-- wall dimensions
 wallThickness       = 2.0;
@@ -43,7 +44,7 @@ lidWallHeight   = 10;
 //-- ridge for lid/base overlap (sealing area)
 ridgeHeight  = 4.0;
 ridgeSlack   = 0.2;
-roundRadius  = 5.0;   // rounded corners
+roundRadius  = 3;
 
 boxType = 0;  // all edges rounded
 
@@ -63,11 +64,11 @@ showSwitches     = true;
 //-------------------------------------------------------------------
 pcbStands =
 [
-  // 4 corner standoffs (adjust to your PCB mounting holes)
-  [5,  5,  standoffHeight, -1, standoffDiameter, standoffPinDiameter],
-  [5,  pcbWidth-5],
-  [pcbLength-5, 5],
-  [pcbLength-5, pcbWidth-5]
+  // 4 corner standoffs (PCB holes: 3mm, 1mm from left/right, 1.5mm from top/bottom)
+  [1,  1.5,  standoffHeight, -1, standoffDiameter, standoffPinDiameter],
+  [1,  pcbWidth-1.5],
+  [pcbLength-1, 1.5],
+  [pcbLength-1, pcbWidth-1.5]
 ];
 
 //===================================================================
@@ -108,13 +109,13 @@ pushButtons =
   // Match cutouts exactly - adjust switchHeight to your tact switches
   // Format: [x, y, capLength, capWidth, capAboveLid, plateThick, switchHeight, travel, poly, pcbTop2Cap]
   // Column 1 (left)
-  [21, 15, 8, 8, 2, 1.5, 20.0, 0.5, 4, 0],
-  [21, 30, 8, 8, 2, 1.5, 20.0, 0.5, 4, 0],
-  [21, 46, 8, 8, 2, 1.5, 20.0, 0.5, 4, 0],
+  [21, 15, 8, 8, 2, 1.5, 25.0, 0.5, 4, 0],
+  [21, 30, 8, 8, 2, 1.5, 25.0, 0.5, 4, 0],
+  [21, 46, 8, 8, 2, 1.5, 25.0, 0.5, 4, 0],
   // Column 2 (right)
-  [49, 15, 8, 8, 2, 1.5, 20.0, 0.5, 4, 0],
-  [49, 30, 8, 8, 2, 1.5, 20.0, 0.5, 4, 0],
-  [49, 46, 8, 8, 2, 1.5, 20.0, 0.5, 4, 0]
+  [49, 15, 8, 8, 2, 1.5, 25.0, 0.5, 4, 0],
+  [49, 30, 8, 8, 2, 1.5, 25.0, 0.5, 4, 0],
+  [49, 46, 8, 8, 2, 1.5, 25.0, 0.5, 4, 0]
 ];
 
 //===================================================================
@@ -140,10 +141,10 @@ labelsPlane =
 //===================================================================
 // *** Connectors - screw posts for secure closure ***
 //-------------------------------------------------------------------
-connectors = 
+connectors =
 [
-  // 4 corner M2 screw posts
-  [5, 5, standoffHeight, 2.2, 4.5, 2.2, 4, yappAllCorners, yappCoordBox],
+  // 4 corner M2 screw posts - moved inside to clear rounded corners
+  [7, 7, standoffHeight, 2.2, 4.5, 2.2, 4, yappAllCorners, yappCoordBox],
 ];
 
 boxMounts     = [];
