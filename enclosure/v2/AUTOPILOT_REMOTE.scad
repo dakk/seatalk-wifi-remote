@@ -27,10 +27,10 @@ pcb =
 
 //-- padding between PCB and inside wall
 //-- increased to avoid overlap between PCB stands and box corner connectors
-paddingFront  = 10;
-paddingBack   = 10;
-paddingRight  = 10;
-paddingLeft   = 10;
+paddingFront  = 4;
+paddingBack   = 4;
+paddingRight  = 4;
+paddingLeft   = 4;
 
 //-- wall dimensions
 wallThickness       = 2.0;
@@ -65,10 +65,10 @@ showSwitches     = true;
 pcbStands =
 [
   // 4 corner standoffs (PCB holes: 3mm, 1mm from left/right, 1.5mm from top/bottom)
-  [1,  1.5,  standoffHeight, -1, standoffDiameter, standoffPinDiameter],
-  [1,  pcbWidth-1.5],
-  [pcbLength-1, 1.5],
-  [pcbLength-1, pcbWidth-1.5]
+  [5,  5,  standoffHeight, -1, standoffDiameter, standoffPinDiameter],
+  [5,  pcbWidth-5],
+  [pcbLength-5, 5],
+  [pcbLength-5, pcbWidth-5]
 ];
 
 //===================================================================
