@@ -47,14 +47,23 @@ ESP32 GPIO 2  ----[LED]--[R]---- GND
 
 ## Configuration
 
-Edit the following in `seatalk-wifi-remote/seatalk-wifi-remote.ino`:
+1. Copy the example configuration file:
+
+```bash
+cp seatalk-wifi-remote/conf_example.h seatalk-wifi-remote/conf.h
+```
+
+2. Edit `seatalk-wifi-remote/conf.h` with your WiFi credentials and gateway settings:
 
 ```cpp
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-const char* seatalkHost = "192.168.1.100";  // SeaTalk gateway IP
-const int seatalkPort = 4001;                // SeaTalk gateway port
+const char* WIFI_SSID = "MyBoatWiFi";
+const char* WIFI_PASSWORD = "my_secret_password";
+
+const char* SEATALK_GATEWAY_IP = "192.168.1.100";  // SeaTalk gateway IP
+const uint16_t SEATALK_GATEWAY_PORT = 4001;         // SeaTalk gateway port
 ```
+
+> **Note:** `conf.h` is gitignored to prevent committing your credentials.
 
 ## Building
 

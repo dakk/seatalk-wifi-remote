@@ -15,13 +15,7 @@
 
 // ============== CONFIGURATION ==============
 
-// WiFi settings
-const char* WIFI_SSID = "YOUR_WIFI_SSID";
-const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
-
-// SeaTalk gateway settings (IP and port of your SeaTalk-to-WiFi bridge)
-const char* SEATALK_GATEWAY_IP = "192.168.1.100";
-const uint16_t SEATALK_GATEWAY_PORT = 4001;
+#include "conf.h"
 
 // Button GPIO pins (choose RTC-capable GPIOs for wake-up support)
 // RTC GPIOs on ESP32: 0, 2, 4, 12-15, 25-27, 32-39
