@@ -109,7 +109,6 @@ void setup() {
   Serial.println("SeaTalk WiFi Remote Controller");
   Serial.println("=================================\n");
 
-  return;
   // Print wake-up reason
   printWakeupReason();
 
@@ -138,9 +137,6 @@ void setup() {
 // ============== MAIN LOOP ==============
 
 void loop() {
-  Serial.println("ciao");
-  return;
-
   // Check WiFi connection
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi disconnected, reconnecting...");
