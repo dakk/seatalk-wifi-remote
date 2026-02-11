@@ -41,6 +41,7 @@
 // Inactivity timeout before auto-sleep (minutes)
 #define INACTIVITY_TIMEOUT_MIN 1
 
+
 // ============== SEATALK COMMANDS ==============
 // SeaTalk autopilot remote keystroke commands (Datagram 86)
 // Format: 86 X1 YY - where X1 = key code, YY = 0x00
@@ -52,7 +53,6 @@ const uint8_t ST_KEY_MINUS_10   = 0x07;  // -10 degrees
 const uint8_t ST_KEY_PLUS_10    = 0x08;  // +10 degrees
 const uint8_t ST_KEY_AUTO       = 0x01;  // Auto mode
 const uint8_t ST_KEY_STANDBY    = 0x02;  // Standby mode
-const uint8_t ST_KEY_TRACK      = 0x03;  // Track mode
 
 // ============== GLOBAL VARIABLES ==============
 
@@ -74,7 +74,7 @@ Button buttons[6] = {
   {BTN3_PIN, ST_KEY_MINUS_10, true, true, 0, false},
   {BTN4_PIN, ST_KEY_PLUS_10,  true, true, 0, false},
   {BTN5_PIN, ST_KEY_AUTO,     true, true, 0, false},  // Toggle auto/standby
-  {BTN6_PIN, ST_KEY_TRACK,    true, true, 0, false}
+  {BTN6_PIN, ST_KEY_STANDBY,  true, true, 0, false}
 };
 
 bool autoMode = false;  // Track current autopilot state for toggle
@@ -87,6 +87,7 @@ unsigned long lastActivityTime = 0;  // Track last button activity for auto-slee
 void setupButtons();
 void setupWiFi();
 void updateButtons();
+uint8_t nmeaChecksum(const char* sentence);
 void sendSeaTalkCommand(uint8_t keyCode);
 void checkSleepCombo();
 void enterDeepSleep();
@@ -113,8 +114,15 @@ void setup() {
   // Initialize buttons
   setupButtons();
 
-  // Connect to WiFi
-  setupWiFi();
+  #ifdef DEBUG_MODE
+    Serial.println("*** DEBUG MODE ENABLED ***");
+    Serial.println("WiFi and SeaTalk are disabled.");
+    Serial.println("Press any button to test. LED blinks = button number.\n");
+    blinkLED(10, 50);
+  #else
+    // Connect to WiFi
+    setupWiFi();
+  #endif
 
   // Indicate ready
   blinkLED(3, 100);
@@ -132,10 +140,12 @@ void setup() {
 
 void loop() {
   // Check WiFi connection
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("WiFi disconnected, reconnecting...");
-    setupWiFi();
-  }
+  #ifndef DEBUG_MODE
+    if (WiFi.status() != WL_CONNECTED) {
+      Serial.println("WiFi disconnected, reconnecting...");
+      setupWiFi();
+    }
+  #endif
 
   // Update button states
   updateButtons();
@@ -284,7 +294,7 @@ void printWakeupReason() {
 // ============== WIFI FUNCTIONS ==============
 
 void setupWiFi() {
-  Serial.printf("Connecting to WiFi: %s", WIFI_SSID);
+  Serial.printf("Connecting to WiFi: %s\n", WIFI_SSID);
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -311,23 +321,43 @@ void setupWiFi() {
 
 // ============== SEATALK FUNCTIONS ==============
 
+uint8_t nmeaChecksum(const char* sentence) {
+  uint8_t cs = 0;
+  // XOR all characters between '$' and '*'
+  for (int i = 1; sentence[i] && sentence[i] != '*'; i++) {
+    cs ^= sentence[i];
+  }
+  return cs;
+}
+
 void sendSeaTalkCommand(uint8_t keyCode) {
   // SeaTalk Datagram 86: Autopilot Remote Keystroke
-  // Format: 86 X1 YY
-  // X = key code, 1 = number of following bytes, YY = 0x00
+  // Format: $STALK,86,21,code1,code2*CS
+  // code1 = keyCode, code2 = 0xFF - keyCode
 
-  uint8_t datagram[3];
-  datagram[0] = 0x86;           // Command byte
-  datagram[1] = (keyCode << 4) | 0x01;  // Key code in high nibble, length in low nibble
-  datagram[2] = 0x00;           // Padding
+  uint8_t code2 = 0xFF - keyCode;
+
+  // Build NMEA sentence without checksum
+  char sentence[40];
+  snprintf(sentence, sizeof(sentence), "$STALK,86,21,%02X,%02X*", keyCode, code2);
+
+  // Compute and append checksum
+  uint8_t cs = nmeaChecksum(sentence);
+  char msg[48];
+  snprintf(msg, sizeof(msg), "$STALK,86,21,%02X,%02X*%02X\r\n", keyCode, code2, cs);
+
+  #ifdef DEBUG_MODE
+    Serial.printf("[DEBUG] Would send: %s", msg);
+    blinkLED(3, 100);
+    return;
+  #endif
 
   // Send via UDP to SeaTalk gateway
   udp.beginPacket(SEATALK_GATEWAY_IP, SEATALK_GATEWAY_PORT);
-  udp.write(datagram, 3);
+  udp.print(msg);
   udp.endPacket();
 
-  Serial.printf("Sent SeaTalk command: 0x%02X 0x%02X 0x%02X (key: 0x%02X)\n",
-                datagram[0], datagram[1], datagram[2], keyCode);
+  Serial.printf("Sent: %s", msg);
 
   // Brief LED flash to indicate transmission
   digitalWrite(LED_PIN, LOW);

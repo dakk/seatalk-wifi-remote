@@ -56,11 +56,11 @@ cp seatalk-wifi-remote/conf_example.h seatalk-wifi-remote/conf.h
 2. Edit `seatalk-wifi-remote/conf.h` with your WiFi credentials and gateway settings:
 
 ```cpp
-const char* WIFI_SSID = "MyBoatWiFi";
-const char* WIFI_PASSWORD = "my_secret_password";
+#define WIFI_SSID "MyBoatWiFi"
+#define WIFI_PASSWORD "my_secret_password"
 
-const char* SEATALK_GATEWAY_IP = "192.168.1.100";  // SeaTalk gateway IP
-const uint16_t SEATALK_GATEWAY_PORT = 4001;         // SeaTalk gateway port
+#define SEATALK_GATEWAY_IP "192.168.1.100"  // SeaTalk gateway IP
+#define SEATALK_GATEWAY_PORT 4001           // SeaTalk gateway port
 ```
 
 > **Note:** `conf.h` is gitignored to prevent committing your credentials.
