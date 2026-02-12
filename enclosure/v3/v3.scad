@@ -15,7 +15,7 @@ render_back_cover  = false;
 // PCB: 70 x 90 mm, padding: 4mm each side, wall: 2mm
 pcb_l       = 70;        // PCB length (X in v2)
 pcb_w       = 90;        // PCB width  (Y in v2)
-padding     = 4;         // padding on each side
+padding     = 2.0;         // padding on each side
 wall        = 2.0;       // wall thickness (from v2)
 corner_r    = 3;         // corner rounding (roundRadius in v2)
 
@@ -70,7 +70,7 @@ function btn_box_y(py) = py + padding + wall - front_h/2;
 tpu_margin     = 6;      // extra margin around button grid
 tpu_thickness  = 1.2;    // membrane thickness
 tpu_bump_h     = 1.5;    // raised bump height on each button
-tpu_bump_inset = 1.5;    // bump inset from opening edge
+tpu_bump_inset = 0.6;    // bump matches opening size (0 = same size as cutout)
 tpu_lip        = 1.5;    // lip width that sits in a channel on the front face
 tpu_lip_depth  = 1.0;    // how deep the lip extends behind the face
 
