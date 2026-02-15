@@ -6,12 +6,13 @@
  * - WiFi connectivity to SeaTalk gateway
  * - 6 configurable buttons for autopilot commands
  * - Deep sleep mode (BTN1 + BTN6 to enter sleep)
- * - Wake from sleep on any button press
+ * - Wake from sleep by pressing BTN5 (Auto/Standby)
  */
 
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <esp_sleep.h>
+#include <driver/rtc_io.h>
 
 // ============== CONFIGURATION ==============
 
@@ -133,7 +134,7 @@ void setup() {
   Serial.println("\nRemote ready!");
   Serial.println("- Press BTN1+BTN6 for 2 seconds to enter sleep mode");
   Serial.printf("- Auto-sleep after %d minutes of inactivity\n", INACTIVITY_TIMEOUT_MIN);
-  Serial.println("- Press any button to wake from sleep\n");
+  Serial.println("- Press BTN5 (Auto/Standby) to wake from sleep\n");
 }
 
 // ============== MAIN LOOP ==============
@@ -247,19 +248,15 @@ void enterDeepSleep() {
   WiFi.disconnect(true);
   WiFi.mode(WIFI_OFF);
 
-  // Configure wake-up sources using EXT1 (multiple pins)
-  // Wake up when ANY of the specified pins goes LOW
-  uint64_t wakeupPinMask = 0;
-  wakeupPinMask |= (1ULL << BTN1_PIN);
-  wakeupPinMask |= (1ULL << BTN2_PIN);
-  wakeupPinMask |= (1ULL << BTN3_PIN);
-  wakeupPinMask |= (1ULL << BTN4_PIN);
-  wakeupPinMask |= (1ULL << BTN5_PIN);
-  wakeupPinMask |= (1ULL << BTN6_PIN);
+  // Configure wake-up source using EXT0 (single pin, supports LOW level trigger)
+  // Note: Original ESP32 EXT1 only supports ALL_LOW or ANY_HIGH, neither works
+  // for waking on a single active-low button press. EXT0 supports one pin with LOW trigger.
+  // To wake from any button, add Schottky diodes from each button to a common wake pin.
+  rtc_gpio_pullup_en((gpio_num_t)BTN5_PIN);
+  rtc_gpio_pulldown_dis((gpio_num_t)BTN5_PIN);
+  esp_sleep_enable_ext0_wakeup((gpio_num_t)BTN5_PIN, LOW);
 
-  esp_sleep_enable_ext1_wakeup(wakeupPinMask, ESP_EXT1_WAKEUP_ALL_LOW);
-
-  Serial.println("Going to sleep now. Press any button to wake up.");
+  Serial.println("Going to sleep now. Press BTN5 (Auto/Standby) to wake up.");
   Serial.flush();
 
   // Enter deep sleep
