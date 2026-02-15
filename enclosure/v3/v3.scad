@@ -26,7 +26,7 @@ front_t     = wall;                         // front face thickness
 
 // ===== Enclosure depth from v2 =====
 // v2: baseWallHeight=25, lidWallHeight=10 -> total depth 35mm
-box_depth   = 28;        // interior depth behind front face
+box_depth   = 33;        // interior depth behind front face
 
 // ===== Hook parameters =====
 hook_w      = 10;        // hook width
