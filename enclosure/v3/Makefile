@@ -9,17 +9,19 @@ BUILD_DIR := stl
 ENCLOSURE_STL := $(BUILD_DIR)/enclosure.stl
 BACK_COVER_STL := $(BUILD_DIR)/back_cover.stl
 TPU_MASK_STL := $(BUILD_DIR)/tpu_mask.stl
+BACK_GASKET_STL := $(BUILD_DIR)/back_gasket.stl
 
 # Common flags: disable all parts by default
 OFF := -D 'render_front_face=false' \
        -D 'render_tpu_mask=false' \
        -D 'render_enclosure=false' \
        -D 'render_hook=false' \
-       -D 'render_back_cover=false'
+       -D 'render_back_cover=false' \
+       -D 'render_back_gasket=false'
 
-.PHONY: all clean enclosure back_cover tpu_mask help
+.PHONY: all clean enclosure back_cover tpu_mask back_gasket help
 
-all: enclosure back_cover tpu_mask
+all: enclosure back_cover tpu_mask back_gasket
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -47,6 +49,13 @@ tpu_mask: $(BUILD_DIR)
 		-D 'render_tpu_mask=true' \
 		$(SCAD_FILE)
 
+back_gasket: $(BUILD_DIR)
+	@echo "Generating TPU back gasket..."
+	$(OPENSCAD) -o $(BACK_GASKET_STL) \
+		$(OFF) \
+		-D 'render_back_gasket=true' \
+		$(SCAD_FILE)
+
 clean:
 	rm -rf $(BUILD_DIR)
 
@@ -57,6 +66,7 @@ help:
 	@echo "  make enclosure  - Generate enclosure.stl (front face + walls + hook)"
 	@echo "  make back_cover - Generate back_cover.stl"
 	@echo "  make tpu_mask   - Generate tpu_mask.stl (print in TPU)"
+	@echo "  make back_gasket- Generate back_gasket.stl (print in TPU)"
 	@echo "  make clean      - Remove generated files"
 	@echo ""
 	@echo "Output directory: $(BUILD_DIR)/"

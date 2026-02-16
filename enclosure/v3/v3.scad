@@ -9,7 +9,8 @@ render_front_face  = true;
 render_tpu_mask    = true;
 render_enclosure   = true;
 render_hook        = true;
-render_back_cover  = false;
+render_back_cover  = true;
+render_back_gasket = true;
 
 // ===== Dimensions from v2 =====
 // PCB: 70 x 90 mm, padding: 4mm each side, wall: 2mm
@@ -43,8 +44,12 @@ screw_head_d  = 4.5;     // M2 screw head diameter (countersink)
 screw_head_h  = 1.5;     // countersink depth
 
 // Gasket channel on back cover
-gasket_w      = 1.5;     // gasket groove width
-gasket_d      = 1.0;     // gasket groove depth
+gasket_w      = 2.3;     // gasket groove width
+gasket_d      = 2.0;     // gasket groove depth
+
+// TPU back gasket parameters
+gasket_tol    = 0.10;    // clearance so gasket slides into channel
+gasket_h      = 1.4;     // gasket height (> gasket_d for compression seal)
 
 // ===== Button layout from v2 =====
 // v2 cutoutsLid positions (PCB-relative coordinates):
@@ -284,6 +289,29 @@ module tpu_mask() {
 }
 
 //-----------------------------------------------------------------------
+// TPU BACK GASKET
+// - Flexible ring that sits in the back cover gasket channel
+// - Slightly taller than the channel depth so it compresses when
+//   the cover is screwed down, forming a waterproof seal
+// - Slightly narrower than the channel for easy insertion
+//-----------------------------------------------------------------------
+module back_gasket() {
+    linear_extrude(gasket_h)
+        difference() {
+            rounded_rect(
+                front_w - 2*wall + gasket_w - gasket_tol,
+                front_h - 2*wall + gasket_w - gasket_tol,
+                corner_r
+            );
+            rounded_rect(
+                front_w - 2*wall - gasket_w + gasket_tol,
+                front_h - 2*wall - gasket_w + gasket_tol,
+                corner_r
+            );
+        }
+}
+
+//-----------------------------------------------------------------------
 // Assembly / Part selection
 //-----------------------------------------------------------------------
 if (render_enclosure) {
@@ -308,4 +336,10 @@ if (render_tpu_mask) {
     color("DarkOrange", 0.7)
         translate([0, 0, front_t + 0.3])  // offset for preview clarity
             tpu_mask();
+}
+
+if (render_back_gasket) {
+    color("Orange", 0.7)
+        translate([0, 0, -box_depth - wall + gasket_d - gasket_h + 0.3])  // seated in channel, offset for preview
+            back_gasket();
 }
