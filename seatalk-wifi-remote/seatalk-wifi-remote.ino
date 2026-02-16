@@ -39,10 +39,6 @@
 // WiFi connection timeout (milliseconds)
 #define WIFI_TIMEOUT_MS 10000
 
-// Inactivity timeout before auto-sleep (minutes)
-#define INACTIVITY_TIMEOUT_MIN 1
-
-
 // ============== SEATALK COMMANDS ==============
 // SeaTalk autopilot remote keystroke commands (Datagram 86)
 // Format: 86 X1 YY - where X1 = key code, YY = 0x00

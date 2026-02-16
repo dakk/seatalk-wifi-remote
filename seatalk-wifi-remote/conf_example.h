@@ -10,4 +10,7 @@
 // Debug mode: set to disable wifi
 // #define DEBUG_MODE
 
+// Inactivity timeout before auto-sleep (minutes)
+#define INACTIVITY_TIMEOUT_MIN 1
+
 #endif
