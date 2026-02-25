@@ -6,7 +6,7 @@
  * - WiFi connectivity to SeaTalk gateway
  * - 6 configurable buttons for autopilot commands
  * - Deep sleep mode (BTN1 + BTN6 to enter sleep)
- * - Wake from sleep by pressing BTN5 (Auto/Standby)
+ * - Wake from sleep by pressing BTN1 (Auto)
  */
 
 #include <WiFi.h>
@@ -66,18 +66,18 @@ struct Button {
 };
 
 Button buttons[6] = {
-  {BTN1_PIN, ST_KEY_MINUS_1,  true, true, 0, false},
-  {BTN2_PIN, ST_KEY_PLUS_1,   true, true, 0, false},
-  {BTN3_PIN, ST_KEY_MINUS_10, true, true, 0, false},
-  {BTN4_PIN, ST_KEY_PLUS_10,  true, true, 0, false},
-  {BTN5_PIN, ST_KEY_AUTO,     true, true, 0, false},  // Toggle auto/standby
+  {BTN1_PIN, ST_KEY_AUTO,  true, true, 0, false},
+  {BTN2_PIN, ST_KEY_MINUS_10,   true, true, 0, false},
+  {BTN3_PIN, ST_KEY_MINUS_1, true, true, 0, false},
+  {BTN4_PIN, ST_KEY_PLUS_1,  true, true, 0, false},
+  {BTN5_PIN, ST_KEY_PLUS_10,     true, true, 0, false},  // Toggle auto/standby
   {BTN6_PIN, ST_KEY_STANDBY,  true, true, 0, false}
 };
 
-bool autoMode = false;  // Track current autopilot state for toggle
 unsigned long sleepComboStartTime = 0;
 bool sleepComboActive = false;
 unsigned long lastActivityTime = 0;  // Track last button activity for auto-sleep
+int wifiFailCount = 0;  // Track consecutive WiFi connection failures
 
 // ============== FUNCTION DECLARATIONS ==============
 
@@ -130,7 +130,7 @@ void setup() {
   Serial.println("\nRemote ready!");
   Serial.println("- Press BTN1+BTN6 for 2 seconds to enter sleep mode");
   Serial.printf("- Auto-sleep after %d minutes of inactivity\n", INACTIVITY_TIMEOUT_MIN);
-  Serial.println("- Press BTN5 (Auto/Standby) to wake from sleep\n");
+  Serial.println("- Press BTN1 (Auto) to wake from sleep\n");
 }
 
 // ============== MAIN LOOP ==============
@@ -156,13 +156,7 @@ void loop() {
       buttons[i].pressed = false;
       lastActivityTime = millis();  // Reset inactivity timer
 
-      // Special handling for BTN5 (Auto/Standby toggle)
-      if (i == 4) {
-        autoMode = !autoMode;
-        sendSeaTalkCommand(autoMode ? ST_KEY_AUTO : ST_KEY_STANDBY);
-      } else {
-        sendSeaTalkCommand(buttons[i].command);
-      }
+      sendSeaTalkCommand(buttons[i].command);
     }
   }
 
@@ -248,11 +242,11 @@ void enterDeepSleep() {
   // Note: Original ESP32 EXT1 only supports ALL_LOW or ANY_HIGH, neither works
   // for waking on a single active-low button press. EXT0 supports one pin with LOW trigger.
   // To wake from any button, add Schottky diodes from each button to a common wake pin.
-  rtc_gpio_pullup_en((gpio_num_t)BTN5_PIN);
-  rtc_gpio_pulldown_dis((gpio_num_t)BTN5_PIN);
-  esp_sleep_enable_ext0_wakeup((gpio_num_t)BTN5_PIN, LOW);
+  rtc_gpio_pullup_en((gpio_num_t)BTN1_PIN);
+  rtc_gpio_pulldown_dis((gpio_num_t)BTN1_PIN);
+  esp_sleep_enable_ext0_wakeup((gpio_num_t)BTN1_PIN, LOW);
 
-  Serial.println("Going to sleep now. Press BTN5 (Auto/Standby) to wake up.");
+  Serial.println("Going to sleep now. Press BTN1 (Auto) to wake up.");
   Serial.flush();
 
   // Enter deep sleep
@@ -295,8 +289,13 @@ void setupWiFi() {
   unsigned long startTime = millis();
   while (WiFi.status() != WL_CONNECTED) {
     if (millis() - startTime > WIFI_TIMEOUT_MS) {
-      Serial.println("\nWiFi connection timeout!");
+      wifiFailCount++;
+      Serial.printf("\nWiFi connection timeout! (attempt %d/4)\n", wifiFailCount);
       blinkLED(10, 50);
+      if (wifiFailCount >= 4) {
+        Serial.println("4 failed WiFi attempts, entering standby...");
+        enterDeepSleep();
+      }
       return;
     }
     delay(500);
@@ -304,6 +303,7 @@ void setupWiFi() {
     digitalWrite(LED_PIN, !digitalRead(LED_PIN));
   }
 
+  wifiFailCount = 0;
   digitalWrite(LED_PIN, HIGH);
   Serial.println("\nWiFi connected!");
   Serial.printf("IP address: %s\n", WiFi.localIP().toString().c_str());
