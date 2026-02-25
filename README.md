@@ -105,20 +105,28 @@ make upload-monitor # Upload and open monitor
 
 ## 3D Printed Enclosure
 
-Two enclosure versions are available in the `enclosure/` directory:
+Multiple enclosure versions are available in the `enclosure/` directory:
 
-### Version 2 (Recommended)
+### Version 3 (Recommended)
 
-Located in `enclosure/v2/` - larger design with 20mm internal clearance for ESP32 and battery.
+Located in `enclosure/v3/` - waterproof custom design with TPU button mask and back gasket.
+
+**Dimensions:** 82mm × 102mm × 35mm (external)
+
+```bash
+cd enclosure/v3
+make           # Generate all STL files
+```
+
+### Version 2
+
+Located in `enclosure/v2/` - YAPP-based design with 20mm internal clearance for ESP32 and battery.
 
 **Dimensions:** 78mm × 98mm × 35mm (external)
 
 ```bash
 cd enclosure/v2
 make           # Generate all STL files
-make base      # Base shell only
-make lid       # Lid only
-make extenders # Button extenders only
 ```
 
 ### Version 1 (Compact)
