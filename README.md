@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 # SeaTalk WiFi Remote
 
 An ESP32-based wireless remote controller for marine autopilot systems using the SeaTalk protocol. Control your autopilot remotely over WiFi instead of using hardwired physical buttons.
